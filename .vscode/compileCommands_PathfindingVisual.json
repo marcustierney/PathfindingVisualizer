@@ -1,0 +1,26 @@
+[
+	{
+		"file": "C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\Source\\PathfindingVisual\\PathfindingVisual.Build.cs",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\.vscode\\compileCommands_PathfindingVisual\\PathfindingVisual.1.rsp"
+		],
+		"directory": "E:\\UnrealEngine\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\Source\\PathfindingVisual\\PathfindingVisual.cpp",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\.vscode\\compileCommands_PathfindingVisual\\PathfindingVisual.1.rsp"
+		],
+		"directory": "E:\\UnrealEngine\\UE_5.7\\Engine\\Source"
+	},
+	{
+		"file": "C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\Source\\PathfindingVisual\\PathfindingVisual.h",
+		"arguments": [
+			"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x64\\cl.exe",
+			"@C:\\Users\\Marcus\\Documents\\Unreal Projects\\PathfindingVisual\\.vscode\\compileCommands_PathfindingVisual\\PathfindingVisual.1.rsp"
+		],
+		"directory": "E:\\UnrealEngine\\UE_5.7\\Engine\\Source"
+	}
+]
