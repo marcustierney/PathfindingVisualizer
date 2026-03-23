@@ -83,28 +83,28 @@ void APathfindingGrid::HandleCellClicked(AGridCell* ClickedCell)
 
     switch (PlacementMode)
     {
-    case EPlacementMode::PlaceStart:
-        if (StartCell) StartCell->SetCellState(ECellState::Empty);
-        StartCell = ClickedCell;
-        ClickedCell->SetCellState(ECellState::Start);
-        break;
+        case EPlacementMode::PlaceStart:
+            if (StartCell) StartCell->SetCellState(ECellState::Empty);
+            StartCell = ClickedCell;
+            ClickedCell->SetCellState(ECellState::Start);
+            break;
 
-    case EPlacementMode::PlaceEnd:
-        if (EndCell) EndCell->SetCellState(ECellState::Empty);
-        EndCell = ClickedCell;
-        ClickedCell->SetCellState(ECellState::End);
-        break;
+        case EPlacementMode::PlaceEnd:
+            if (EndCell) EndCell->SetCellState(ECellState::Empty);
+            EndCell = ClickedCell;
+            ClickedCell->SetCellState(ECellState::End);
+            break;
 
-    case EPlacementMode::PlaceObstacle:
-        if (ClickedCell != StartCell && ClickedCell != EndCell)
-            ClickedCell->SetCellState(ECellState::Obstacle);
-        break;
+        case EPlacementMode::PlaceObstacle:
+            if (ClickedCell != StartCell && ClickedCell != EndCell)
+                ClickedCell->SetCellState(ECellState::Obstacle);
+            break;
 
-    case EPlacementMode::EraseObstacle:
-        if (ClickedCell->CellState == ECellState::Obstacle)
-            ClickedCell->SetCellState(ECellState::Empty);
-        break;
-    }
+        case EPlacementMode::EraseObstacle:
+            if (ClickedCell->CellState == ECellState::Obstacle)
+                ClickedCell->SetCellState(ECellState::Empty);
+            break;
+        }
 }
 
 void APathfindingGrid::ClearVisualization()
@@ -139,7 +139,20 @@ void APathfindingGrid::StartVisualization()
     StepIndex = 0;
     bShowingPath = false;
 
-    RunBFS();
+    switch (SelectedAlgorithm)
+    {
+        case EAlgorithm::BFS:
+        {
+            RunBFS();
+            break;
+        }
+
+        case EAlgorithm::DFS:
+        {
+            RunDFS();
+            break;
+        }
+    }
 
     bIsRunning = true;
     GetWorldTimerManager().SetTimer(StepTimer, this, &APathfindingGrid::TickStep, StepDelay, true);
@@ -194,6 +207,47 @@ void APathfindingGrid::RunBFS()
         Algo::Reverse(PathOrder);
     }
 }
+
+void APathfindingGrid::RunDFS() {
+    TArray<AGridCell*> Stack;
+    TSet<AGridCell*> Visited;
+    TMap<AGridCell*, AGridCell*> CameFrom;
+    bool bFound = false;
+    Stack.Push(StartCell);
+    CameFrom.Add(StartCell, nullptr);
+
+    while (!Stack.IsEmpty()) {
+        AGridCell* Current = Stack.Pop();
+        if (Visited.Contains(Current)) continue;
+        Visited.Add(Current);
+        if (Current == EndCell)
+        {
+            bFound = true;
+            break;
+        }
+        VisitOrder.Add({Current->GridX, Current->GridY});
+        for (AGridCell* Neighbour : GetNeighbours(Current))
+        {
+            if (!Visited.Contains(Neighbour))
+            {
+                CameFrom.FindOrAdd(Neighbour) = Current;
+                Stack.Push(Neighbour);
+            }
+        }
+    }
+
+    if (bFound)
+    {
+        AGridCell* C = EndCell;
+        while (C && C != StartCell)
+        {
+            PathOrder.Add({ C->GridX, C->GridY });
+            C = CameFrom[C];
+        }
+        Algo::Reverse(PathOrder);
+    }
+}
+
 
 void APathfindingGrid::TickStep()
 {

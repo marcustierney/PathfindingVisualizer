@@ -14,6 +14,13 @@ enum class EPlacementMode : uint8
     EraseObstacle UMETA(DisplayName = "Erase Obstacle")
 };
 
+UENUM(BlueprintType)
+enum class EAlgorithm : uint8
+{
+    BFS UMETA(DisplayName = "Breadth-First Search"),
+    DFS UMETA(DisplayName = "Depth-First Search")
+};
+
 UCLASS()
 class PATHFINDINGVISUAL_API APathfindingGrid : public AActor
 {
@@ -40,6 +47,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     EPlacementMode PlacementMode = EPlacementMode::PlaceStart;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Algorithm")
+    EAlgorithm SelectedAlgorithm = EAlgorithm::BFS;
+    
     UFUNCTION(BlueprintCallable, Category = "Grid")
     void BuildGrid();
 
@@ -65,6 +75,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+
     UPROPERTY()
     TArray<AGridCell*> Cells;
 
@@ -86,5 +97,6 @@ private:
     TArray<AGridCell*> GetNeighbours(AGridCell* Cell) const;
     bool IsValidCell(int32 X, int32 Y) const;
     void RunBFS();
+    void RunDFS();
     void TickStep();
 };
