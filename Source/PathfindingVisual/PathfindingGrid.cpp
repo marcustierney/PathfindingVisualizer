@@ -157,6 +157,11 @@ void APathfindingGrid::StartVisualization()
             RunGreedy();
             break;
         }
+        case EAlgorithm::AStar:
+        {
+            RunAStar();
+            break;
+        }
     }
 
     bIsRunning = true;
@@ -282,6 +287,61 @@ void APathfindingGrid::RunGreedy()
             {
                 CameFrom.FindOrAdd(Neighbour) = Current;
                 OpenList.Add(Neighbour);
+            }
+        }
+    }
+    if (bFound)
+    {
+        AGridCell* C = EndCell;
+        while (C && C != StartCell)
+        {
+            PathOrder.Add({ C->GridX, C->GridY });
+            C = CameFrom[C];
+        }
+        Algo::Reverse(PathOrder);
+    }
+}
+
+void APathfindingGrid::RunAStar()
+{
+    TArray<AGridCell*> OpenList;
+    TSet<AGridCell*> Visited;
+    TMap<AGridCell*, AGridCell*> CameFrom;
+    TMap<AGridCell*, float> GScore;
+    bool bFound = false;
+    GScore.Add(StartCell, 0.f);
+    OpenList.Add(StartCell);
+    CameFrom.Add(StartCell, nullptr);
+
+    while (!OpenList.IsEmpty())
+    {
+        OpenList.Sort([&](AGridCell& A, AGridCell& B)
+            {
+                float FA = GScore.FindOrAdd(&A) + Heuristic(&A, EndCell);
+                float FB = GScore.FindOrAdd(&B) + Heuristic(&B, EndCell);
+                return FA > FB;
+            });
+        AGridCell* Current = OpenList.Pop();
+        if (Visited.Contains(Current)) continue;
+        Visited.Add(Current);
+        if (Current == EndCell)
+        {
+            bFound = true;
+            break;
+        }
+        VisitOrder.Add({ Current->GridX, Current->GridY });
+        for (AGridCell* Neighbour : GetNeighbours(Current))
+        {
+            if (!Visited.Contains(Neighbour))
+            {
+                float NewG = GScore.FindOrAdd(Current) + 1.f;
+                if (NewG < GScore.FindOrAdd(Neighbour, 99999.f))
+                {
+                    GScore.FindOrAdd(Neighbour) = NewG;
+                    CameFrom.FindOrAdd(Neighbour) = Current;
+                    if (!OpenList.Contains(Neighbour))
+                        OpenList.Add(Neighbour);
+                }
             }
         }
     }

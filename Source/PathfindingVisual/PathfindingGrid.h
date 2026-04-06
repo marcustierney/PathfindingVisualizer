@@ -19,7 +19,8 @@ enum class EAlgorithm : uint8
 {
     BFS UMETA(DisplayName = "Breadth-First Search"),
     DFS UMETA(DisplayName = "Depth-First Search"),
-    Greedy UMETA(DisplayName = "Greedy Best-First")
+    Greedy UMETA(DisplayName = "Greedy Best-First"),
+    AStar UMETA(DisplayName = "A*")
 };
 
 UCLASS()
@@ -100,5 +101,6 @@ private:
     void RunBFS();
     void RunDFS();
     void RunGreedy();
+    void RunAStar();
     void TickStep();
 };
