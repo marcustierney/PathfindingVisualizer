@@ -18,7 +18,8 @@ UENUM(BlueprintType)
 enum class EAlgorithm : uint8
 {
     BFS UMETA(DisplayName = "Breadth-First Search"),
-    DFS UMETA(DisplayName = "Depth-First Search")
+    DFS UMETA(DisplayName = "Depth-First Search"),
+    Greedy UMETA(DisplayName = "Greedy Best-First")
 };
 
 UCLASS()
@@ -92,11 +93,12 @@ private:
     int32 StepIndex = 0;
     bool bShowingPath = false;
     FTimerHandle StepTimer;
-
+    float Heuristic(AGridCell* A, AGridCell* B) const;
     AGridCell* GetCell(int32 X, int32 Y) const;
     TArray<AGridCell*> GetNeighbours(AGridCell* Cell) const;
     bool IsValidCell(int32 X, int32 Y) const;
     void RunBFS();
     void RunDFS();
+    void RunGreedy();
     void TickStep();
 };

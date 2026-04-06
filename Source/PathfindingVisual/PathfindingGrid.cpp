@@ -152,6 +152,11 @@ void APathfindingGrid::StartVisualization()
             RunDFS();
             break;
         }
+        case EAlgorithm::Greedy:
+        {
+            RunGreedy();
+            break;
+        }
     }
 
     bIsRunning = true;
@@ -248,6 +253,54 @@ void APathfindingGrid::RunDFS() {
     }
 }
 
+void APathfindingGrid::RunGreedy()
+{
+    TArray<AGridCell*> OpenList;
+    TSet<AGridCell*> Visited;
+    TMap<AGridCell*, AGridCell*> CameFrom;
+    bool bFound = false;
+    OpenList.Add(StartCell);
+    CameFrom.Add(StartCell, nullptr);
+    while (!OpenList.IsEmpty())
+    {
+        OpenList.Sort([&](AGridCell& A, AGridCell& B)
+            {
+                return Heuristic(&A, EndCell) > Heuristic(&B, EndCell);
+            });
+        AGridCell* Current = OpenList.Pop();
+        if (Visited.Contains(Current)) continue;
+        Visited.Add(Current);
+        if (Current == EndCell)
+        {
+            bFound = true;
+            break;
+        }
+        VisitOrder.Add({ Current->GridX, Current->GridY });
+        for (AGridCell* Neighbour : GetNeighbours(Current))
+        {
+            if (!Visited.Contains(Neighbour))
+            {
+                CameFrom.FindOrAdd(Neighbour) = Current;
+                OpenList.Add(Neighbour);
+            }
+        }
+    }
+    if (bFound)
+    {
+        AGridCell* C = EndCell;
+        while (C && C != StartCell)
+        {
+            PathOrder.Add({ C->GridX, C->GridY });
+            C = CameFrom[C];
+        }
+        Algo::Reverse(PathOrder);
+    }
+}
+
+float APathfindingGrid::Heuristic(AGridCell* A, AGridCell* B) const
+{
+    return FMath::Abs(A->GridX - B->GridX) + FMath::Abs(A->GridY - B->GridY);
+}
 
 void APathfindingGrid::TickStep()
 {
