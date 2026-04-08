@@ -302,46 +302,75 @@ void APathfindingGrid::RunGreedy()
     }
 }
 
-void APathfindingGrid::RunAStar()
+void APathfindingGrid::RunAStar() //used https://github.com/JDSherbert/A-Star-Pathfinding/blob/main/Pathfinder.cpp as a ref
 {
-    TArray<AGridCell*> OpenList;
-    TSet<AGridCell*> Visited;
-    TMap<AGridCell*, AGridCell*> CameFrom;
-    TMap<AGridCell*, float> GScore;
     bool bFound = false;
-    GScore.Add(StartCell, 0.f);
-    OpenList.Add(StartCell);
-    CameFrom.Add(StartCell, nullptr);
-
+    TArray<TArray<bool>> ClosedList;
+    ClosedList.SetNum(GridWidth);
+    for (int32 i = 0; i < GridWidth; i++)
+    {
+        ClosedList[i].Init(false, GridHeight);
+    }
+    TArray<TArray<float>> GScore;
+    GScore.SetNum(GridWidth);
+    for (int32 i = 0; i < GridWidth; i++)
+    {
+        GScore[i].Init(99999.f, GridHeight);
+    }
+    TArray<TArray<AGridCell*>> Parent;
+    Parent.SetNum(GridWidth);
+    for (int32 i = 0; i < GridWidth; i++)
+    {
+        Parent[i].Init(nullptr, GridHeight);
+    }
+    struct FOpenNode
+    {
+        AGridCell* Cell;
+        float F;
+        float G;
+    };
+    TArray<FOpenNode> OpenList;
+    GScore[StartCell->GridX][StartCell->GridY] = 0.f;
+    float StartH = Heuristic(StartCell, EndCell);
+    OpenList.Add({ StartCell, StartH, 0.f });
     while (!OpenList.IsEmpty())
     {
-        OpenList.Sort([&](AGridCell& A, AGridCell& B)
+        int32 BestIndex = 0;
+        for (int32 i = 1; i < OpenList.Num(); i++)
+        {
+            bool bBetterF = OpenList[i].F < OpenList[BestIndex].F;
+            bool bTiedF = OpenList[i].F == OpenList[BestIndex].F;
+            bool bBetterG = OpenList[i].G > OpenList[BestIndex].G;
+            if (bBetterF || (bTiedF && bBetterG))
             {
-                float FA = GScore.FindOrAdd(&A) + Heuristic(&A, EndCell);
-                float FB = GScore.FindOrAdd(&B) + Heuristic(&B, EndCell);
-                return FA > FB;
-            });
-        AGridCell* Current = OpenList.Pop();
-        if (Visited.Contains(Current)) continue;
-        Visited.Add(Current);
+                BestIndex = i;
+            }
+        }
+        AGridCell* Current = OpenList[BestIndex].Cell;
+        float CurrentG = OpenList[BestIndex].G;
+        OpenList.RemoveAt(BestIndex);
+        if (ClosedList[Current->GridX][Current->GridY]) continue;
         if (Current == EndCell)
         {
             bFound = true;
             break;
         }
+        ClosedList[Current->GridX][Current->GridY] = true;
+
         VisitOrder.Add({ Current->GridX, Current->GridY });
         for (AGridCell* Neighbour : GetNeighbours(Current))
         {
-            if (!Visited.Contains(Neighbour))
+            int32 NX = Neighbour->GridX;
+            int32 NY = Neighbour->GridY;
+            if (ClosedList[NX][NY]) continue;
+            float NewG = GScore[Current->GridX][Current->GridY] + 1.f;
+            if (NewG < GScore[NX][NY])
             {
-                float NewG = GScore.FindOrAdd(Current) + 1.f;
-                if (NewG < GScore.FindOrAdd(Neighbour, 99999.f))
-                {
-                    GScore.FindOrAdd(Neighbour) = NewG;
-                    CameFrom.FindOrAdd(Neighbour) = Current;
-                    if (!OpenList.Contains(Neighbour))
-                        OpenList.Add(Neighbour);
-                }
+                GScore[NX][NY] = NewG;
+                float NewH = Heuristic(Neighbour, EndCell);
+                float NewF = NewG + NewH;
+                Parent[NX][NY] = Current;
+                OpenList.Add({ Neighbour, NewF, NewG });
             }
         }
     }
@@ -351,7 +380,7 @@ void APathfindingGrid::RunAStar()
         while (C && C != StartCell)
         {
             PathOrder.Add({ C->GridX, C->GridY });
-            C = CameFrom[C];
+            C = Parent[C->GridX][C->GridY];
         }
         Algo::Reverse(PathOrder);
     }
